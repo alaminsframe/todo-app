@@ -1,48 +1,29 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Check, X, Calendar, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Check, X,} from 'lucide-react';
 
 interface Todo {
   id: number;
   text: string;
   completed: boolean;
-  createdAt: Date;
-  dueDate?: Date;
-  priority: 'low' | 'medium' | 'high';
 }
-
-type PriorityColor = {
-  [key in Todo['priority']]: string;
-};
-
-const priorityColors: PriorityColor = {
-  low: 'bg-blue-100 text-blue-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-red-100 text-red-800',
-};
 
 const TodoApp: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
-  const [priority, setPriority] = useState<Todo['priority']>('medium');
-  const [dueDate, setDueDate] = useState<string>('');
 
-  const addTodo = (e: React.FormEvent) => {
-    e.preventDefault();
+  const addTodo = () => {
+    
     if (newTodo.trim()) {
       const todo: Todo = {
-        id: Date.now(),
+        id: todos.length + 1,
         text: newTodo.trim(),
         completed: false,
-        createdAt: new Date(),
-        priority,
-        ...(dueDate && { dueDate: new Date(dueDate) })
       };
       setTodos([...todos, todo]);
       setNewTodo('');
-      setDueDate('');
-      setPriority('medium');
     }
   };
+  
 
   const toggleTodo = (id: number) => {
     setTodos(todos.map(todo =>
@@ -52,11 +33,6 @@ const TodoApp: React.FC = () => {
 
   const deleteTodo = (id: number) => {
     setTodos(todos.filter(todo => todo.id !== id));
-  };
-
-  const isOverdue = (todo: Todo): boolean => {
-    if (!todo.dueDate || todo.completed) return false;
-    return new Date() > new Date(todo.dueDate);
   };
 
   const activeTodos = todos.filter(todo => !todo.completed).length;
@@ -71,49 +47,28 @@ const TodoApp: React.FC = () => {
           </span>
         </div>
 
-        <form onSubmit={addTodo} className="space-y-4 mb-6">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newTodo}
-              onChange={(e) => setNewTodo(e.target.value)}
-              placeholder="Add a new todo..."
-              className="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          </div>
+        <div className="flex gap-2 mb-6">
+          <input
+            type="text"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            placeholder="Add a new todo..."
+            className="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={addTodo}
+            className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+        </div>
 
-          <div className="flex gap-4">
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as Todo['priority'])}
-              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="low">Low Priority</option>
-              <option value="medium">Medium Priority</option>
-              <option value="high">High Priority</option>
-            </select>
-
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </form>
-
-        <div className="space-y-3">
+        <div className="space-y-3 overflow-y-auto max-h-60">
           {todos.map(todo => (
             <div
               key={todo.id}
               className={`flex items-center justify-between p-4 rounded-lg border ${
-                todo.completed ? 'bg-gray-50' : 'bg-white'
+                todo.completed ? 'bg-gray-100' : 'bg-white'
               }`}
             >
               <div className="flex items-center gap-3 flex-grow">
@@ -135,21 +90,6 @@ const TodoApp: React.FC = () => {
                     {todo.text}
                   </span>
                   
-                  <div className="flex gap-2 items-center mt-1">
-                    <span className={`text-xs px-2 py-1 rounded-full ${priorityColors[todo.priority]}`}>
-                      {todo.priority}
-                    </span>
-                    
-                    {todo.dueDate && (
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(todo.dueDate).toLocaleDateString()}
-                        {isOverdue(todo) && (
-                          <AlertCircle className="h-3 w-3 text-red-500" />
-                        )}
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
 
